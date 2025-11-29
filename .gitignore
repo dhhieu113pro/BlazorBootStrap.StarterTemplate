@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+*.suo
+*.lock.json
+.vs/
+.vscode/
+.idea/
+node_modules/
+*.nupkg

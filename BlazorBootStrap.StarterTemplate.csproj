@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<PackageType>Template</PackageType>
+		<PackageVersion>1.0.0</PackageVersion>
+		<PackageId>BlazorBootStrap.StarterTemplate</PackageId>
+		<Title>Blazor Auto Global Mode with Bootstrap Starter</Title>
+		<Authors>Hieu Dam</Authors>
+		<Description>A Blazor WebAssembly template with Bootstrap for .NET 8, 9, and 10. Includes a host project and client project in auto global render mode.</Description>
+		<PackageTags>dotnet-new;templates;blazor;webassembly;bootstrap;blazor-auto</PackageTags>
+		<PackageProjectUrl>https://github.com/dhhieu113pro/BlazorBootStrap.StarterTemplate</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/dhhieu113pro/BlazorBootStrap.StarterTemplate</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<IncludeContentInPack>true</IncludeContentInPack>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<ContentTargetFolders>content</ContentTargetFolders>
+		<NoWarn>$(NoWarn);NU5128</NoWarn>
+		<NoDefaultExcludes>true</NoDefaultExcludes>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="**\*" Exclude="**\bin\**;**\obj\**;**\.vs\**;**\.vscode\**;**\.idea\**;**\*.user;**\*.lock.json;**/node_modules/**" />
+		<Compile Remove="**\*" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
+		<!-- Uncomment if you have an icon -->
+		<!-- <None Include="icon.png" Pack="true" PackagePath="\" /> -->
+	</ItemGroup>
+
+</Project>

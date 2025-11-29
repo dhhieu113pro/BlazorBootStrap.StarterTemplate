@@ -1,0 +1,62 @@
+name: Build and Test Template
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore BlazorBootStrap.StarterTemplate.csproj
+
+    - name: Pack template
+      run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release -o ./artifacts
+
+    - name: Install template locally
+      run: dotnet new install ./artifacts/*.nupkg
+
+    - name: List installed templates
+      run: dotnet new list
+
+    - name: Create test project from template (net10.0)
+ run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net10 --Framework net10.0 -o ./test/net10
+
+    - name: Create test project from template (net9.0)
+    run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net9 --Framework net9.0 -o ./test/net9
+
+    - name: Create test project from template (net8.0)
+      run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net8 --Framework net8.0 -o ./test/net8
+
+    - name: Build test project (net10.0)
+      run: dotnet build ./test/net10/TestProject.Net10.Host/TestProject.Net10.Host.csproj
+
+    - name: Build test project (net9.0)
+      run: dotnet build ./test/net9/TestProject.Net9.Host/TestProject.Net9.Host.csproj
+      continue-on-error: true  # .NET 9 might not be installed
+
+    - name: Build test project (net8.0)
+      run: dotnet build ./test/net8/TestProject.Net8.Host/TestProject.Net8.Host.csproj
+      continue-on-error: true  # .NET 8 might not be installed
+
+    - name: Uninstall template
+      run: dotnet new uninstall BlazorBootStrap.StarterTemplate
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: template-package
+        path: ./artifacts/*.nupkg
+        retention-days: 7
