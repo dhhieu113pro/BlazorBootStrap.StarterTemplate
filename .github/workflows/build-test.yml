@@ -19,9 +19,6 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore BlazorBootStrap.StarterTemplate.csproj
-
     - name: Pack template
       run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release -o ./artifacts
 

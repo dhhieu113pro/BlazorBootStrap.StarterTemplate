@@ -43,11 +43,8 @@ jobs:
         VERSION="${{ steps.get_version.outputs.version }}"
         sed -i "s/<PackageVersion>.*<\/PackageVersion>/<PackageVersion>$VERSION<\/PackageVersion>/" BlazorBootStrap.StarterTemplate.csproj
 
-    - name: Restore dependencies
-      run: dotnet restore BlazorBootStrap.StarterTemplate.csproj
-
     - name: Pack template
-      run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release --no-restore -o ./artifacts
+      run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release -o ./artifacts
 
     - name: List artifacts
       run: ls -la ./artifacts
