@@ -1,3 +1,4 @@
+using BlazorBootStrap.Client;
 using BlazorBootStrap.Host.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddBlazorBootstrap();
+
+// Add HttpClient for server-side rendering
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<GoogleTrendClient>();
 
 var app = builder.Build();
 
@@ -25,8 +30,22 @@ else
 
 app.UseHttpsRedirection();
 
-
 app.UseAntiforgery();
+
+// API endpoint to proxy Google Trends RSS feed (to bypass CORS)
+app.MapGet("/api/google-trends", async (GoogleTrendClient googleTrendClient, string? geo) =>
+{
+    try
+    {
+        var country = geo ?? "VN";
+        var response = await googleTrendClient.GetTrendsAsync(country);
+        return Results.Content(response, "application/xml; charset=utf-8");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to fetch Google Trends: {ex.Message}");
+    }
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

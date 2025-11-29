@@ -1,34 +1,50 @@
 ﻿@page "/weather"
+@using BlazorBootStrap.Client.Models
+@inject HttpClient Http
 
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>This component demonstrates fetching weather data from Open-Meteo API.</p>
 
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
 }
+else if (error != null)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> @error
+    </div>
+}
 else
 {
-    <table class="table">
+    <div class="mb-4">
+        <h3>Current Weather</h3>
+        <p><strong>Location:</strong> Latitude @weatherData?.Latitude, Longitude @weatherData?.Longitude</p>
+        <p><strong>Temperature:</strong> @weatherData?.Current?.Temperature°C</p>
+        <p><strong>Wind Speed:</strong> @weatherData?.Current?.WindSpeed km/h</p>
+    </div>
+
+    <h3>Hourly Forecast (Next 24 Hours)</h3>
+    <table class="table table-striped">
         <thead>
             <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
+                <th>Time</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Wind Speed (km/h)</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@forecast.Time</td>
+                    <td>@forecast.Temperature</td>
+                    <td>@forecast.Humidity</td>
+                    <td>@forecast.WindSpeed</td>
                 </tr>
             }
         </tbody>
@@ -37,27 +53,43 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private OpenMeteoResponse? weatherData;
+    private string? error;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        try
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            // Fetch weather data from Open-Meteo API
+            weatherData = await Http.GetFromJsonAsync<OpenMeteoResponse>(
+                "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"
+          );
+
+            if (weatherData?.Hourly != null)
+            {
+                // Take only the next 24 hours
+                forecasts = Enumerable.Range(0, Math.Min(24, weatherData.Hourly.Time?.Count ?? 0))
+             .Select(i => new WeatherForecast
+             {
+                 Time = DateTime.Parse(weatherData.Hourly.Time![i]).ToString("MMM dd, HH:mm"),
+                 Temperature = weatherData.Hourly.Temperature![i],
+                 Humidity = weatherData.Hourly.RelativeHumidity![i],
+                 WindSpeed = weatherData.Hourly.WindSpeed![i]
+             })
+                   .ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load weather data: {ex.Message}";
+        }
     }
 
     private class WeatherForecast
     {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public string Time { get; set; } = string.Empty;
+        public double Temperature { get; set; }
+        public int Humidity { get; set; }
+        public double WindSpeed { get; set; }
     }
 }
