@@ -8,7 +8,7 @@ on:
     inputs:
       version:
         description: 'Package version (e.g., 1.0.0)'
-   required: false
+        required: false
         default: '1.0.0'
 
 jobs:
@@ -18,11 +18,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    with:
+      with:
         fetch-depth: 0  # Get all history for proper versioning
 
     - name: Setup .NET
-uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x'
 
@@ -30,24 +30,24 @@ uses: actions/setup-dotnet@v4
       id: get_version
       run: |
         if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-    VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         else
-     VERSION="${{ github.event.inputs.version }}"
+          VERSION="${{ github.event.inputs.version }}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-   fi
+        fi
         echo "Package version: $VERSION"
 
     - name: Update package version
       run: |
-      VERSION="${{ steps.get_version.outputs.version }}"
-  sed -i "s/<PackageVersion>.*<\/PackageVersion>/<PackageVersion>$VERSION<\/PackageVersion>/" BlazorBootStrap.StarterTemplate.csproj
+        VERSION="${{ steps.get_version.outputs.version }}"
+        sed -i "s/<PackageVersion>.*<\/PackageVersion>/<PackageVersion>$VERSION<\/PackageVersion>/" BlazorBootStrap.StarterTemplate.csproj
 
     - name: Restore dependencies
       run: dotnet restore BlazorBootStrap.StarterTemplate.csproj
 
     - name: Pack template
-    run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release --no-restore -o ./artifacts
+      run: dotnet pack BlazorBootStrap.StarterTemplate.csproj -c Release --no-restore -o ./artifacts
 
     - name: List artifacts
       run: ls -la ./artifacts
@@ -64,6 +64,6 @@ uses: actions/setup-dotnet@v4
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: ./artifacts/*.nupkg
-     generate_release_notes: true
-  env:
+        generate_release_notes: true
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

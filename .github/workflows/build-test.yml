@@ -32,10 +32,10 @@ jobs:
       run: dotnet new list
 
     - name: Create test project from template (net10.0)
- run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net10 --Framework net10.0 -o ./test/net10
+      run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net10 --Framework net10.0 -o ./test/net10
 
     - name: Create test project from template (net9.0)
-    run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net9 --Framework net9.0 -o ./test/net9
+      run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net9 --Framework net9.0 -o ./test/net9
 
     - name: Create test project from template (net8.0)
       run: dotnet new blazor-bootstrap-auto-global -n TestProject.Net8 --Framework net8.0 -o ./test/net8
